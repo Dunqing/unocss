@@ -1,14 +1,16 @@
 export const presetMiniTargets: string[] = [
   // align
+  'text-left',
   'vertical-baseline',
   'vertical-super',
+  'vertical-inherit',
   'align-text-bottom',
+  'align-revert',
+  'align-start',
   'v-top',
   'v-mid',
-  'vertical-inherit',
-  'align-revert',
   'v-unset',
-  'text-left',
+  'v-end',
 
   // behaviors
   'outline-none',
@@ -409,6 +411,8 @@ export const presetMiniTargets: string[] = [
   'shadow-green-900/50',
   'shadow-op-50',
   'shadow-inset',
+  'shadow-[0px_4px_4px_0px_rgba(237,_0,_0,_1)]',
+  'shadow-$variable',
 
   // size
   'h-auto',
@@ -829,10 +833,6 @@ export const presetMiniTargets: string[] = [
   'tracking-$variable',
   'word-spacing-$variable',
   'ws-$variable',
-
-  // variables - escaping
-  // eslint-disable-next-line no-template-curly-in-string
-  'ws-${row.span}/24',
 
   // variables - property
   '[a:b]',

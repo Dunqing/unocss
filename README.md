@@ -29,8 +29,8 @@ The instant on-demand Atomic CSS engine.
 Inspired by [Windi CSS](http://windicss.org/), [Tailwind CSS](https://tailwindcss.com/), and [Twind](https://github.com/tw-in-js/twind), but:
 
 - [Fully customizable](#configurations) - no core utilities, all functionalities are provided via presets.
-- No parsing, no AST, no scanning, it's **INSTANT** (200x faster than Windi CSS or Tailwind JIT).
-- ~5kb min+gzip - zero deps and browser friendly.
+- No parsing, no AST, no scanning, it's **INSTANT** (5x faster than Windi CSS or Tailwind JIT).
+- ~6kb min+brotli - zero deps and browser friendly.
 - [Shortcuts](#shortcuts) - aliasing utilities, dynamically.
 - [Attributify mode](https://github.com/unocss/unocss/tree/main/packages/preset-attributify/) - group utilities in attributes.
 - [Pure CSS Icons](https://github.com/unocss/unocss/tree/main/packages/preset-icons/) - use any icon as a single class.
@@ -42,84 +42,15 @@ Inspired by [Windi CSS](http://windicss.org/), [Tailwind CSS](https://tailwindcs
 - [VS Code extension](https://marketplace.visualstudio.com/items?itemName=antfu.unocss)
 - Code-splitting for CSS - ships minimal CSS for MPA.
 
-###### Benchmark
-
-```
-2022/7/2 08:38:12 PM
-1656 utilities | x50 runs (min build time)
-
-none                              5.87 ms / delta.      0.00 ms 
-unocss       v0.43.0              9.17 ms / delta.      3.30 ms (x1.00)
-tailwindcss  v3.1.4             497.24 ms / delta.    491.37 ms (x148.70)
-windicss     v3.5.5             869.47 ms / delta.    863.60 ms (x261.35)
-```
-
 ## Installation
 
-### Vite
-
-```bash
-npm i -D unocss
-```
-
-```ts
-// vite.config.ts
-import Unocss from 'unocss/vite'
-
-export default {
-  plugins: [
-    Unocss({ /* options */ }),
-  ],
-}
-```
-
-Add `uno.css` to your main entry:
-
-```ts
-// main.ts
-import 'uno.css'
-```
-
-That's it, have fun.
-
-Learn more at [@unocss/vite](https://github.com/unocss/unocss/blob/main/packages/vite).
-
-See [all packages](https://github.com/unocss/unocss/tree/main/packages).
-
-### Nuxt
-
-```bash
-npm i -D @unocss/nuxt
-```
-
-```ts
-// nuxt.config.js
-
-export default {
-  modules: [
-    '@unocss/nuxt',
-  ],
-}
-```
-
-Learn more at [@unocss/nuxt](https://github.com/unocss/unocss/tree/main/packages/nuxt)
+[Vite](https://github.com/unocss/unocss/blob/main/packages/vite) | [Nuxt](https://github.com/unocss/unocss/blob/main/packages/nuxt) | [Astro](https://github.com/unocss/unocss/blob/main/packages/astro) | [Webpack](https://github.com/unocss/unocss/blob/main/packages/webpack) | [CDN Runtime](https://github.com/unocss/unocss/blob/main/packages/runtime) | [CLI](https://github.com/unocss/unocss/blob/main/packages/cli) | [VS Code extension](https://github.com/unocss/unocss/blob/main/packages/vscode)
 
 ## Configurations
 
 UnoCSS is an atomic-CSS engine instead of a framework. Everything is designed with flexibility and performance in mind. There are no core utilities in UnoCSS, all functionalities are provided via presets.
 
 By default, UnoCSS applies [the default preset](https://github.com/unocss/unocss/tree/main/packages/preset-uno), which provides a common superset of the popular utilities-first frameworks Tailwind CSS, Windi CSS, Bootstrap, Tachyons, etc.
-
-For example: `ml-3` (Tailwind), `ms-2` (Bootstrap), `ma4` (Tachyons), and `mt-10px` (Windi CSS) are all valid.
-
-```css
-.ma4 { margin: 1rem; }
-.ml-3 { margin-left: 0.75rem; }
-.ms-2 { margin-inline-start: 0.5rem; }
-.mt-10px { margin-top: 10px; }
-```
-
-Learn more about [the default preset](https://github.com/unocss/unocss/tree/main/packages/preset-uno).
 
 ### Presets
 
@@ -144,6 +75,15 @@ Presets are the heart of UnoCSS. They let you make your own custom framework in 
 - [unocss-preset-scrollbar](https://github.com/action-hong/unocss-preset-scrollbar) - Scrollbar Preset by [@action-hong](https://github.com/action-hong).
 - [unocss-preset-uni](https://github.com/zguolee/unocss-preset-uni) - UniApp Preset by [@zguolee](https://github.com/zguolee).
 - [unocss-preset-weapp](https://github.com/MellowCo/unocss-preset-weapp) - Wechat MiniProgram Preset for [UniApp](https://uniapp.dcloud.io) and [Taro](https://taro-docs.jd.com/taro/docs) by [@MellowCo](https://github.com/MellowCo).
+- [unocss-preset-heropatterns](https://github.com/Julien-R44/unocss-preset-heropatterns) - Preset that integrates [Hero Patterns](https://heropatterns.com/) by [@Julien-R44](https://github.com/Julien-R44).
+- [unocss-preset-flowbite](https://github.com/Julien-R44/unocss-preset-flowbite) - Port of of [Flowbite Tailwind plugin](https://github.com/themesberg/flowbite) for UnoCSS by [@Julien-R44](https://github.com/Julien-R44).
+- [unocss-preset-forms](https://github.com/Julien-R44/unocss-preset-forms) - Port of [@tailwindcss/forms](https://github.com/tailwindlabs/tailwindcss-forms) for UnoCSS by [@Julien-R44](https://github.com/Julien-R44).
+- [unocss-preset-extra](https://github.com/MoomFE/unocss-preset-extra) - [Animate.css](https://animate.style) Preset and some other rules by [@Zhang-Wei-666](https://github.com/Zhang-Wei-666).
+- [unocss-preset-daisy](https://github.com/kidonng/unocss-preset-daisy) - daisyUI Preset by [@kidonng](https://github.com/kidonng).
+
+###### Community Frameworks
+
+- [Anu](https://github.com/jd-solanki/anu) - DX focused utility based vue component library by [@jd-solanki](https://github.com/jd-solanki)
 
 ### Using Presets
 
@@ -406,7 +346,7 @@ preflights: [
   {
     getCSS: ({ theme }) => `
       * {
-        color: ${theme.colors.gray?.[700] ?? '#333'}
+        color: ${theme.colors.gray?.[700] ?? '#333'};
         padding: 0;
         margin: 0;
       }
@@ -460,7 +400,7 @@ As a result, the following CSS will be generated:
 
 With this, we could have `m-2` applied only when users hover over the element.
 
-The variant system is very powerful and can't be covered fully in this guide, you can check [the default preset's implementation](https://github.com/unocss/unocss/tree/main/packages/preset-mini/src/variants) to see more advanced usages.
+The variant system is very powerful and can't be covered fully in this guide, you can check [the default preset's implementation](https://github.com/unocss/unocss/tree/main/packages/preset-mini/src/_variants) to see more advanced usages.
 
 ### Extend Theme
 
@@ -587,7 +527,7 @@ preprocess(matcher) {
 
 ### Scanning
 
-Please note that UnoCSS works **at build time**, meaning only statically presented utilities will be generated and shipped to your app. Utilities that used dynamically or fetched from external resources at runtime might not be appied.
+Please note that UnoCSS works **at build time**, meaning only statically presented utilities will be generated and shipped to your app. Utilities that used dynamically or fetched from external resources at runtime might not be applied.
 
 By default UnoCSS will extract the utilities usage from files in your build pipeline with extension `.jsx`, `.tsx`, `.vue`, `.md`, `.html`, `.svelte`, `.astro`. And then generate the CSS on demand.
 

@@ -186,6 +186,18 @@ declare global {
 }
 ```
 
+### Astro
+
+```ts
+import type { AttributifyAttributes } from '@unocss/preset-attributify'
+
+declare global {
+  namespace astroHTML.JSX {
+    interface HTMLAttributes extends AttributifyAttributes { }
+  }
+}
+```
+
 ### Attributify with Prefix
 
 ```ts
@@ -198,7 +210,7 @@ interface HTMLAttributes extends Partial<Record<AttributifyNames<Prefix>, string
 
 ## Credits
 
-Initial idea by [@Tahul](https://github.com/Tahul) and [@antfu](https://github.com/antfu). Pior implementation in Windi CSS by [@voorjaar](https://github.com/voorjaar).
+Initial idea by [@Tahul](https://github.com/Tahul) and [@antfu](https://github.com/antfu). Prior implementation in Windi CSS by [@voorjaar](https://github.com/voorjaar).
 
 ## License
 

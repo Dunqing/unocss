@@ -41,12 +41,11 @@ exports[`preset-mini > targets 1`] = `
 .content-\\\\$unocss-var{align-content:var(--unocss-var);}
 .fw-\\\\$variable{font-weight:var(--variable);}
 .items-\\\\$size{align-items:var(--size);}
-.ws-\\\\$\\\\{row\\\\.span\\\\}\\\\/24{white-space:var(--\\\\{row\\\\.span\\\\}\\\\/24);}
 .ws-\\\\$variable{white-space:var(--variable);}
 .\\\\[a\\\\:b\\\\]{a:b;}
-.\\\\[background-image\\\\:url\\\\(star_transparent\\\\.gif\\\\)\\\\,_url\\\\(cat_front\\\\.png\\\\)\\\\]{background-image:url(star\\\\_transparent.gif), url(cat\\\\_front.png);}
+.\\\\[background-image\\\\:url\\\\(star_transparent\\\\.gif\\\\)\\\\,_url\\\\(cat_front\\\\.png\\\\)\\\\]{background-image:url(star_transparent.gif), url(cat_front.png);}
 .\\\\[content\\\\:attr\\\\(attr_content\\\\)\\\\]{content:attr(attr content);}
-.\\\\[content\\\\:attr\\\\(attr\\\\\\\\_content\\\\)\\\\]{content:attr(attr\\\\_content);}
+.\\\\[content\\\\:attr\\\\(attr\\\\\\\\_content\\\\)\\\\]{content:attr(attr_content);}
 .\\\\[margin\\\\:logical_1rem_2rem_3rem\\\\]{margin:logical 1rem 2rem 3rem;}
 .all-\\\\[\\\\.target\\\\]-\\\\[combinator\\\\:test-2\\\\] .target,
 .children-\\\\[\\\\.target\\\\]-\\\\[combinator\\\\:test-2\\\\]>.target,
@@ -477,14 +476,16 @@ div:hover .group-\\\\[div\\\\:hover\\\\]-\\\\[combinator\\\\:test-4\\\\]{combina
 .font-oblique,
 .oblique{font-style:oblique;}
 .antialiased{-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;font-smoothing:grayscale;}
-.shadow{--un-shadow:var(--un-shadow-inset) 0 1px 3px 0 var(--un-shadow-color, rgba(0,0,0,0.1)),var(--un-shadow-inset) 0 1px 2px -1px var(--un-shadow-color, rgba(0,0,0,0.1));box-shadow:var(--un-ring-offset-shadow), var(--un-ring-shadow), var(--un-shadow);}
-.shadow-none{--un-shadow:0 0 var(--un-shadow-color, rgba(0,0,0,0));box-shadow:var(--un-ring-offset-shadow), var(--un-ring-shadow), var(--un-shadow);}
-.shadow-xl{--un-shadow:var(--un-shadow-inset) 0 20px 25px -5px var(--un-shadow-color, rgba(0,0,0,0.1)),var(--un-shadow-inset) 0 8px 10px -6px var(--un-shadow-color, rgba(0,0,0,0.1));box-shadow:var(--un-ring-offset-shadow), var(--un-ring-shadow), var(--un-shadow);}
 .backdrop\\\\:shadow-green::backdrop{--un-shadow-opacity:1;--un-shadow-color:rgba(74,222,128,var(--un-shadow-opacity));}
+.shadow{--un-shadow:var(--un-shadow-inset) 0 1px 3px 0 var(--un-shadow-color, rgba(0,0,0,0.1)),var(--un-shadow-inset) 0 1px 2px -1px var(--un-shadow-color, rgba(0,0,0,0.1));box-shadow:var(--un-ring-offset-shadow), var(--un-ring-shadow), var(--un-shadow);}
+.shadow-\\\\[0px_4px_4px_0px_rgba\\\\(237\\\\,_0\\\\,_0\\\\,_1\\\\)\\\\]{--un-shadow:0px 4px 4px 0px var(--un-shadow-color, rgba(237,0,0,1));box-shadow:var(--un-ring-offset-shadow), var(--un-ring-shadow), var(--un-shadow);}
+.shadow-\\\\$variable{--un-shadow:var(--variable);box-shadow:var(--un-ring-offset-shadow), var(--un-ring-shadow), var(--un-shadow);}
 .shadow-current{--un-shadow-color:currentColor;}
 .shadow-green-500{--un-shadow-opacity:1;--un-shadow-color:rgba(34,197,94,var(--un-shadow-opacity));}
 .shadow-green-900\\\\/50{--un-shadow-color:rgba(20,83,45,0.5);}
+.shadow-none{--un-shadow:0 0 var(--un-shadow-color, rgba(0,0,0,0));box-shadow:var(--un-ring-offset-shadow), var(--un-ring-shadow), var(--un-shadow);}
 .shadow-transparent{--un-shadow-color:transparent;}
+.shadow-xl{--un-shadow:var(--un-shadow-inset) 0 20px 25px -5px var(--un-shadow-color, rgba(0,0,0,0.1)),var(--un-shadow-inset) 0 8px 10px -6px var(--un-shadow-color, rgba(0,0,0,0.1));box-shadow:var(--un-ring-offset-shadow), var(--un-ring-shadow), var(--un-shadow);}
 .shadow-op-50{--un-shadow-opacity:0.5;}
 .shadow-inset{--un-shadow-inset:inset;}
 .ring,
@@ -676,7 +677,7 @@ div:hover .group-\\\\[div\\\\:hover\\\\]-\\\\[combinator\\\\:test-4\\\\]{combina
 .aspect-ratio-square{aspect-ratio:1/1;}
 .aspect-ratio-video{aspect-ratio:16/9;}
 .aspect-unset{aspect-ratio:unset;}
-.cursor-\\\\[url\\\\(cursor_2\\\\.png\\\\)_2_2\\\\,_pointer\\\\]{cursor:url(cursor\\\\_2.png) 2 2, pointer;}
+.cursor-\\\\[url\\\\(cursor_2\\\\.png\\\\)_2_2\\\\,_pointer\\\\]{cursor:url(cursor_2.png) 2 2, pointer;}
 .cursor-\\\\$pointer-var{cursor:var(--pointer-var);}
 .cursor-inherit{cursor:inherit;}
 .cursor-pointer{cursor:pointer;}
@@ -690,9 +691,11 @@ div:hover .group-\\\\[div\\\\:hover\\\\]-\\\\[combinator\\\\:test-4\\\\]{combina
 .resize-none{resize:none;}
 .resize-inherit{resize:inherit;}
 .align-revert{vertical-align:revert;}
-.align-text-bottom{vertical-align:text-bottom;}
-.v-mid{vertical-align:middle;}
+.align-start,
 .v-top{vertical-align:top;}
+.align-text-bottom{vertical-align:text-bottom;}
+.v-end{vertical-align:bottom;}
+.v-mid{vertical-align:middle;}
 .v-unset{vertical-align:unset;}
 .vertical-baseline{vertical-align:baseline;}
 .vertical-inherit{vertical-align:inherit;}

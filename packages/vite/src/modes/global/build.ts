@@ -125,7 +125,10 @@ export function GlobalModeBuildPlugin({ uno, ready, extract, tokens, filter, get
         css = await applyCssTransform(css, fakeCssId, options.dir)
 
         const hash = getHash(css)
-        await cssPost.transform!.call({} as any, getHashPlaceholder(hash), fakeCssId)
+        const transformHandler = 'handler' in cssPost.transform!
+          ? cssPost.transform.handler
+          : cssPost.transform!
+        await transformHandler.call({} as any, getHashPlaceholder(hash), fakeCssId)
 
         // fool the css plugin to generate the css in corresponding chunk
         chunk.modules[fakeCssId] = {
@@ -141,9 +144,7 @@ export function GlobalModeBuildPlugin({ uno, ready, extract, tokens, filter, get
     },
     {
       name: 'unocss:global:build:generate',
-      apply(options, { command }) {
-        return command === 'build' && !options.build?.ssr
-      },
+      apply: 'build',
       configResolved(config) {
         viteConfig = config
       },
@@ -197,7 +198,7 @@ export function GlobalModeBuildPlugin({ uno, ready, extract, tokens, filter, get
         if (!replaced) {
           let msg = '[unocss] does not found CSS placeholder in the generated chunks'
           if (viteConfig.build.lib && checkJs)
-            msg += '\nIt seems you are building in library mode, it\'s recommanded to set `build.cssCodeSplit` to true.\nSee https://github.com/vitejs/vite/issues/1579'
+            msg += '\nIt seems you are building in library mode, it\'s recommended to set `build.cssCodeSplit` to true.\nSee https://github.com/vitejs/vite/issues/1579'
           else
             msg += '\nThis is likely an internal bug of unocss vite plugin'
           this.error(new Error(msg))

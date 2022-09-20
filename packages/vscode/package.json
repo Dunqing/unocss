@@ -1,8 +1,8 @@
 {
   "publisher": "antfu",
-  "name": "@vscode/unocss",
+  "name": "@unocss/vscode",
   "displayName": "UnoCSS",
-  "version": "0.45.6",
+  "version": "0.45.22",
   "private": true,
   "description": "UnoCSS for VS Code",
   "license": "MIT",
@@ -23,6 +23,9 @@
   "activationEvents": [
     "workspaceContains:**/vite.config.*",
     "workspaceContains:**/nuxt.config.*",
+    "workspaceContains:**/astro.config.*",
+    "workspaceContains:**/iles.config.*",
+    "workspaceContains:**/svelte.config.*",
     "workspaceContains:**/uno.config.*",
     "workspaceContains:**/unocss.config.*",
     "workspaceContains:**/package.json"
@@ -67,13 +70,13 @@
     "publish": "esno ./scripts/publish.ts"
   },
   "devDependencies": {
-    "@types/vscode": "^1.62.0",
+    "@types/vscode": "^1.71.0",
     "@unocss/nuxt": "workspace:*",
     "@unocss/preset-uno": "workspace:*",
     "esno": "^0.16.3",
-    "jiti": "^1.14.0",
+    "jiti": "^1.15.0",
     "prettier": "^2.7.1",
-    "tsup": "^6.2.1",
-    "unconfig": "^0.3.5"
+    "tsup": "^6.2.3",
+    "unconfig": "^0.3.6"
   }
 }

@@ -36,7 +36,7 @@ export interface ParsedColorValue {
    */
   name: string
   /**
-   * Color scale, preferrably 000 - 999.
+   * Color scale, preferably 000 - 999.
    */
   no: string
   /**
@@ -78,7 +78,7 @@ export interface RuleContext<Theme extends {} = {}> {
    */
   variantMatch: VariantMatchedResult
   /**
-   * Constrcut a custom CSS rule.
+   * Construct a custom CSS rule.
    * Variants and selector escaping will be handled automatically.
    */
   constructCSS: (body: CSSEntries | CSSObject, overrideSelector?: string) => string
@@ -130,7 +130,7 @@ export interface PreflightContext<Theme extends {} = {}> {
 
 export interface Extractor {
   name: string
-  extract(ctx: ExtractorContext): Awaitable<Set<string> | undefined>
+  extract(ctx: ExtractorContext): Awaitable<Set<string> | string[] | undefined>
   order?: number
 }
 
@@ -201,11 +201,11 @@ export interface VariantHandlerContext {
    */
   prefix: string
   /**
-   * Rewrite the output selector. Often be used to append pesudo classes.
+   * Rewrite the output selector. Often be used to append pseudo classes.
    */
   selector: string
   /**
-   * Rewrite the output selector. Often be used to append pesudo elements.
+   * Rewrite the output selector. Often be used to append pseudo elements.
    */
   pseudo: string
   /**
@@ -228,6 +228,11 @@ export interface VariantHandlerContext {
    * Order in which the variant is sorted within single rule.
    */
   sort?: number
+  /**
+   * Option to not merge the resulting entries even if the body are the same.
+   * @default false
+   */
+  noMerge?: boolean
 }
 
 export interface VariantHandler {
@@ -244,7 +249,7 @@ export interface VariantHandler {
    */
   order?: number
   /**
-   * Rewrite the output selector. Often be used to append pesudo classes or parents.
+   * Rewrite the output selector. Often be used to append pseudo classes or parents.
    */
   selector?: (input: string, body: CSSEntries) => string | undefined
   /**
@@ -273,7 +278,7 @@ export interface VariantObject<Theme extends {} = {}> {
    */
   name?: string
   /**
-   * The entry function to match and rewrite the selector for futher processing.
+   * The entry function to match and rewrite the selector for further processing.
    */
   match: VariantFunction<Theme>
 
@@ -529,6 +534,7 @@ export interface UnocssPluginContext<Config extends UserConfig = UserConfig> {
 
   root: string
   updateRoot: (root: string) => Promise<LoadConfigResult<Config>>
+  getConfigFileList: () => string[]
 }
 
 export interface SourceMap {
@@ -611,7 +617,7 @@ RequiredByKey<UserConfig, 'mergeSelectors' | 'theme' | 'rules' | 'variants' | 'l
   preprocess: Preprocessor[]
   postprocess: Postprocessor[]
   rulesSize: number
-  rulesDynamic: (DynamicRule | undefined)[]
+  rulesDynamic: [number, ...DynamicRule][]
   rulesStaticMap: Record<string, [number, CSSObject | CSSEntries, RuleMeta | undefined, Rule] | undefined>
   autocomplete: {
     templates: (AutoCompleteFunction | AutoCompleteTemplate)[]
@@ -655,6 +661,7 @@ export type StringifiedUtil = readonly [
   parent: string | undefined,
   meta: RuleMeta | undefined,
   context: RuleContext | undefined,
+  noMerge: boolean | undefined,
 ]
 
 export type PreparedRule = readonly [
@@ -669,6 +676,7 @@ export interface UtilObject {
   parent: string | undefined
   layer: string | undefined
   sort: number | undefined
+  noMerge: boolean | undefined
 }
 
 export interface GenerateOptions {
@@ -690,13 +698,13 @@ export interface GenerateOptions {
   safelist?: boolean
 
   /**
-   * Genreate minified CSS
+   * Generate minified CSS
    * @default false
    */
   minify?: boolean
 
   /**
-   * @expiremental
+   * @experimental
    */
   scope?: string
 }

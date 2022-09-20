@@ -1,5 +1,5 @@
 import { createNanoEvents } from '../utils/events'
-import type { CSSEntries, CSSObject, ExtractorContext, GenerateOptions, GenerateResult, ParsedUtil, PreflightContext, PreparedRule, RawUtil, ResolvedConfig, Rule, RuleContext, RuleMeta, Shortcut, ShortcutValue, StringifiedUtil, UserConfig, UserConfigDefaults, UtilObject, Variant, VariantContext, VariantHandler, VariantHandlerContext, VariantMatchedResult } from '../types'
+import type { CSSEntries, CSSObject, DynamicRule, ExtractorContext, GenerateOptions, GenerateResult, ParsedUtil, PreflightContext, PreparedRule, RawUtil, ResolvedConfig, RuleContext, RuleMeta, Shortcut, ShortcutValue, StringifiedUtil, UserConfig, UserConfigDefaults, UtilObject, Variant, VariantContext, VariantHandler, VariantHandlerContext, VariantMatchedResult } from '../types'
 import { resolveConfig } from '../config'
 import { CONTROL_SHORTCUT_NO_MERGE, TwoKeyMap, e, entriesToCss, expandVariantGroup, isRawUtil, isStaticShortcut, isString, noop, normalizeCSSEntries, normalizeCSSValues, notNull, uniq, warnOnce } from '../utils'
 import { version } from '../../package.json'
@@ -45,7 +45,10 @@ export class UnoGenerator {
 
     for (const extractor of this.config.extractors) {
       const result = await extractor.extract(context)
-      result?.forEach(t => set.add(t))
+      if (result) {
+        for (const token of result)
+          set.add(token)
+      }
     }
 
     return set
@@ -225,12 +228,12 @@ export class UnoGenerator {
           const sorted: PreparedRule[] = items
             .filter(i => (i[4]?.layer || LAYER_DEFAULT) === layer)
             .sort((a, b) => a[0] - b[0] || (a[4]?.sort || 0) - (b[4]?.sort || 0) || a[1]?.localeCompare(b[1] || '') || a[2]?.localeCompare(b[2] || '') || 0)
-            .map(([, selector, body,, meta]) => {
+            .map(([, selector, body,, meta,, variantNoMerge]) => {
               const scopedSelector = selector ? applyScope(selector, scope) : selector
               return [
                 [[scopedSelector ?? '', meta?.sort ?? 0]],
                 body,
-                !!meta?.noMerge,
+                !!(variantNoMerge ?? meta?.noMerge),
               ]
             })
           if (!sorted.length)
@@ -384,6 +387,7 @@ export class UnoGenerator {
       parent,
       layer: variantContextResult.layer,
       sort: variantContextResult.sort,
+      noMerge: variantContextResult.noMerge,
     }
 
     for (const p of this.config.postprocess)
@@ -409,18 +413,16 @@ export class UnoGenerator {
       ? this.matchVariants(input)
       : input
 
-    const recordRule = this.config.details
-      ? (r: Rule) => {
-          context.rules = context.rules ?? []
-          context.rules.push(r)
-        }
-      : noop
+    if (this.config.details)
+      context.rules = context.rules ?? []
 
     // use map to for static rules
     const staticMatch = this.config.rulesStaticMap[processed]
     if (staticMatch) {
       if (staticMatch[1] && (internal || !staticMatch[2]?.internal)) {
-        recordRule(staticMatch[3])
+        if (this.config.details)
+          context.rules!.push(staticMatch[3])
+
         const index = staticMatch[0]
         const entry = normalizeCSSEntries(staticMatch[1])
         const meta = staticMatch[2]
@@ -433,25 +435,24 @@ export class UnoGenerator {
 
     context.variantHandlers = variantHandlers
 
-    const { rulesDynamic, rulesSize } = this.config
+    const { rulesDynamic } = this.config
 
-    // match rules, from last to first
-    for (let i = rulesSize - 1; i >= 0; i--) {
-      const rule = rulesDynamic[i]
-
-      // static rules are omitted as undefined
-      if (!rule)
-        continue
-
+    // match rules
+    for (const [i, matcher, handler, meta] of rulesDynamic) {
       // ignore internal rules
-      if (rule[2]?.internal && !internal)
+      if (meta?.internal && !internal)
         continue
 
-      // dynamic rules
-      const [matcher, handler, meta] = rule
-      if (meta?.prefix && !processed.startsWith(meta.prefix))
-        continue
-      const unprefixed = meta?.prefix ? processed.slice(meta.prefix.length) : processed
+      // match prefix
+      let unprefixed = processed
+      if (meta?.prefix) {
+        if (!processed.startsWith(meta.prefix))
+          continue
+
+        unprefixed = processed.slice(meta.prefix.length)
+      }
+
+      // match rule
       const match = unprefixed.match(matcher)
       if (!match)
         continue
@@ -460,7 +461,8 @@ export class UnoGenerator {
       if (!result)
         continue
 
-      recordRule(rule)
+      if (this.config.details)
+        context.rules!.push([matcher, handler, meta] as DynamicRule)
 
       const entries = normalizeCSSValues(result).filter(i => i.length)
       if (entries.length) {
@@ -478,9 +480,9 @@ export class UnoGenerator {
     if (!parsed)
       return
     if (isRawUtil(parsed))
-      return [parsed[0], undefined, parsed[1], undefined, parsed[2], this.config.details ? context : undefined]
+      return [parsed[0], undefined, parsed[1], undefined, parsed[2], this.config.details ? context : undefined, undefined]
 
-    const { selector, entries, parent, layer: variantLayer, sort: variantSort } = this.applyVariants(parsed)
+    const { selector, entries, parent, layer: variantLayer, sort: variantSort, noMerge } = this.applyVariants(parsed)
     const body = entriesToCss(entries)
 
     if (!body)
@@ -492,7 +494,7 @@ export class UnoGenerator {
       layer: variantLayer ?? metaLayer,
       sort: variantSort ?? metaSort,
     }
-    return [parsed[0], selector, body, parent, ruleMeta, this.config.details ? context : undefined]
+    return [parsed[0], selector, body, parent, ruleMeta, this.config.details ? context : undefined, noMerge]
   }
 
   expandShortcut(input: string, context: RuleContext, depth = 5): [ShortcutValue[], RuleMeta | undefined] | undefined {
@@ -530,7 +532,7 @@ export class UnoGenerator {
       }
     }
 
-    // expand nested shotcuts
+    // expand nested shortcuts
     if (isString(result))
       result = expandVariantGroup(result).split(/\s+/g)
 
@@ -585,15 +587,15 @@ export class UnoGenerator {
     const rawStringfieldUtil: StringifiedUtil[] = []
     for (const item of parsed) {
       if (isRawUtil(item)) {
-        rawStringfieldUtil.push([item[0], undefined, item[1], undefined, item[2], context])
+        rawStringfieldUtil.push([item[0], undefined, item[1], undefined, item[2], context, undefined])
         continue
       }
-      const { selector, entries, parent, sort } = this.applyVariants(item, [...item[4], ...parentVariants], raw)
+      const { selector, entries, parent, sort, noMerge } = this.applyVariants(item, [...item[4], ...parentVariants], raw)
 
       // find existing selector/mediaQuery pair and merge
       const mapItem = selectorMap.getFallback(selector, parent, [[], item[0]])
       // add entries
-      mapItem[0].push([entries, !!item[3]?.noMerge, sort ?? 0])
+      mapItem[0].push([entries, !!(noMerge ?? item[3]?.noMerge), sort ?? 0])
     }
     return rawStringfieldUtil.concat(selectorMap
       .map(([e, index], selector, joinedParents) => {
@@ -603,7 +605,7 @@ export class UnoGenerator {
           return (flatten ? [entriesList.flat(1)] : entriesList).map((entries: CSSEntries): StringifiedUtil | undefined => {
             const body = entriesToCss(entries)
             if (body)
-              return [index, selector, body, joinedParents, { ...meta, noMerge, sort: maxSort }, context]
+              return [index, selector, body, joinedParents, { ...meta, noMerge, sort: maxSort }, context, undefined]
             return undefined
           })
         }
@@ -644,7 +646,8 @@ function applyScope(css: string, scope?: string) {
 export function movePseudoElementsEnd(selector: string) {
   const pseudoElements = selector.match(/::[\w-]+(\([\w-]+\))?/g)
   if (pseudoElements) {
-    pseudoElements.forEach(e => (selector = selector.replace(e, '')))
+    for (const e of pseudoElements)
+      selector = selector.replace(e, '')
     selector += pseudoElements.join('')
   }
   return selector

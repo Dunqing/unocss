@@ -5,6 +5,7 @@ export default defineBuildConfig({
     'src/index',
     'src/vite',
     'src/webpack',
+    'src/astro',
     'src/preset-uno',
     'src/preset-icons',
     'src/preset-attributify',
@@ -18,6 +19,7 @@ export default defineBuildConfig({
   declaration: true,
   externals: [
     'vite',
+    'astro',
     'webpack',
     '@unocss/webpack',
   ],

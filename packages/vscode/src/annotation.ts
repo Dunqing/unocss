@@ -1,7 +1,7 @@
 import path from 'path'
 import type { DecorationOptions, ExtensionContext, StatusBarItem } from 'vscode'
 import { DecorationRangeBehavior, MarkdownString, Range, window, workspace } from 'vscode'
-import { INCLUDE_COMMENT_IDE, getMatchedPositions, isCssId } from './integration'
+import { INCLUDE_COMMENT_IDE, getMatchedPositionsFromCode, isCssId } from './integration'
 import { log } from './log'
 import { getColorsMap, getPrettiedMarkdown, isSubdir, throttle } from './utils'
 import type { ContextLoader } from './contextLoader'
@@ -31,12 +31,14 @@ export async function registerAnnotations(
 
     if (contextLoader.contextsMap.has(dir)) {
       const ctx = contextLoader.contextsMap.get(dir)!
+      if (!ctx.getConfigFileList().includes(id))
+        return
       try {
         await ctx.reloadConfig()
-        log.appendLine(`Config reloaded by ${path.relative(cwd, doc.uri.fsPath)}`)
+        log.appendLine(`🛠 Config reloaded by ${path.relative(cwd, doc.uri.fsPath)}`)
       }
       catch (e) {
-        log.appendLine('Error on loading config')
+        log.appendLine('⚠️ Error on loading config')
         log.appendLine(String(e))
       }
     }
@@ -101,7 +103,7 @@ export async function registerAnnotations(
 
       const ranges: DecorationOptions[] = (
         await Promise.all(
-          getMatchedPositions(code, Array.from(result.matched))
+          (await getMatchedPositionsFromCode(ctx.uno, code))
             .map(async (i): Promise<DecorationOptions> => {
               // side-effect: update colorRanges
               if (colorPreview && colorsMap.has(i[2]) && !_colorPositionsCache.has(`${i[0]}:${i[1]}`)) {
@@ -122,7 +124,7 @@ export async function registerAnnotations(
                 }
               }
               catch (e) {
-                log.appendLine(`Failed to parse ${i[2]}`)
+                log.appendLine(`⚠️ Failed to parse ${i[2]}`)
                 log.appendLine(String(e))
                 return undefined!
               }
@@ -154,7 +156,7 @@ export async function registerAnnotations(
       }
     }
     catch (e) {
-      log.appendLine('Error on annotation')
+      log.appendLine('⚠️ Error on annotation')
       log.appendLine(String(e))
     }
   }

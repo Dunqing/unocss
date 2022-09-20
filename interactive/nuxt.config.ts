@@ -14,13 +14,12 @@ export default defineNuxtConfig({
   alias,
   modules: [
     '@vueuse/nuxt',
-    '@unocss/nuxt',
+    '~/../packages/nuxt/src/index.ts',
     '~/modules/markdown',
   ],
   ssr: false,
   experimental: {
     reactivityTransform: true,
-    viteNode: true,
   },
   postcss: {
     plugins: {
@@ -35,14 +34,13 @@ export default defineNuxtConfig({
       include: [/\.vue$/, /\.md$/],
     },
   },
-  autoImports: {
+  imports: {
     transform: {
       include: [/\.vue$/, /\.md$/],
     },
   },
   vite: {
     logLevel: 'info',
-    // @ts-expect-error any
     vue: {
       include: [/\.vue$/, /\.md$/],
     },
