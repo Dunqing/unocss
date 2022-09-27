@@ -2,12 +2,14 @@ import type { Preset } from '@unocss/core'
 import { mergeDeep } from '@unocss/core'
 import type { Theme } from '@unocss/preset-mini'
 
+const PRESET_THEME_RULE = 'PRESET_THEME_RULE'
+
 export interface PresetTheme {
   theme: Record<'dark' | 'light', Theme>
   /**
    * @default --un-preset-theme
    */
-  prefix: string
+  prefix?: string
 }
 
 const getThemeVal = (theme: any, keys: string[]) => {
@@ -26,14 +28,14 @@ export const presetTheme = (options: PresetTheme): Preset<Theme> => {
     light?: string
     dark?: string
     original?: string
-    var: string
+    name: string
   }>()
   const varsRE = new RegExp(`var\\((${prefix}.*)\\)`)
   const usedTheme: {
     light?: string | undefined
     dark?: string | undefined
     original?: string | undefined
-    var: string
+    name: string
   }[] = []
 
   return {
@@ -45,14 +47,14 @@ export const presetTheme = (options: PresetTheme): Preset<Theme> => {
           const themeKeys = preKeys.concat(key)
 
           if (typeof val !== 'object' && !Array.isArray(val)) {
-            const varName = `${prefix}-${themeKeys.join('-')}`
+            const name = `${prefix}-${themeKeys.join('-')}`
 
-            theme[key] = `var(${varName})`
-            themeValues.set(varName, {
+            theme[key] = `var(${name})`
+            themeValues.set(name, {
               light: getThemeVal(light, themeKeys),
               dark: getThemeVal(dark, themeKeys),
               original: getThemeVal(originalTheme, themeKeys),
-              var: varName,
+              name,
             })
           }
           else {
@@ -62,14 +64,37 @@ export const presetTheme = (options: PresetTheme): Preset<Theme> => {
         return theme
       }
 
-      const theme = recursiveTheme(mergeDeep(dark, light))
-      mergeDeep(originalTheme, theme)
+      Object.assign(originalTheme, mergeDeep(originalTheme, recursiveTheme(mergeDeep(dark, light))))
     },
+    rules: [
+      [
+        new RegExp(`^${PRESET_THEME_RULE}$`),
+        (_, context) => {
+          const isDark = Array.from(context.variantMatch[3].values()).some(({ name }) => {
+            return name === 'dark'
+          })
+          return usedTheme.reduce((obj, e) => {
+            return {
+              ...obj,
+              [e.name]: (isDark ? e.dark : e.light) ?? e.original,
+            }
+          }, {})
+        },
+      ],
+    ],
     preflights: [
       {
         layer: 'theme',
         async getCSS(context) {
-          return (await context.generator.generate('')).css
+          const { css } = (await context.generator.generate(`${PRESET_THEME_RULE} dark:${PRESET_THEME_RULE}`, {
+            preflights: false,
+          }))
+
+          const realCSS = css
+            .replace(`.dark\\:${PRESET_THEME_RULE}`, '')
+            .replace(`.${PRESET_THEME_RULE}`, 'root ')
+            .replace(/\/\*.*layer.*\*\/\s*\n/, '')
+          return realCSS
         },
       },
     ],

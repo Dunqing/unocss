@@ -47,6 +47,7 @@ describe('theme', () => {
       'text-main-100',
       'bg-main-200',
       'border-main-500',
+      'border-main-6',
       'text-xl',
       'text-xs',
     ]
@@ -62,7 +63,8 @@ describe('theme', () => {
       .text-xs{font-size:0.75rem;line-height:1rem;}
       .text-main-100{color:var(--un-preset-theme-colors-main-100);}
       /* layer: theme */
-      root{--un-preset-theme-colors-main-100: #000001;--un-preset-theme-colors-main-200: #000002;--un-preset-theme-colors-main-300: #000003;--un-preset-theme-colors-main-400: #000004;--un-preset-theme-colors-main-500: #000004;--un-preset-theme-colors-main-600: #000006;--un-preset-theme-colors-main-700: #000007;--un-preset-theme-colors-main-800: #000008}.dark{--un-preset-theme-colors-main-100: #fffff1;--un-preset-theme-colors-main-200: #fffff2;--un-preset-theme-colors-main-300: #fffff3;--un-preset-theme-colors-main-400: #fffff4;--un-preset-theme-colors-main-500: #fffff4;--un-preset-theme-colors-main-600: #fffff6;--un-preset-theme-colors-main-700: #fffff7;--un-preset-theme-colors-main-800: #fffff8}"
+      .dark {--un-preset-theme-colors-main-100:#fffff1;--un-preset-theme-colors-main-500:#fffff4;--un-preset-theme-colors-main-200:#fffff2;}
+      root {--un-preset-theme-colors-main-100:#000001;--un-preset-theme-colors-main-500:#000004;--un-preset-theme-colors-main-200:#000002;}"
     `)
   })
 })
