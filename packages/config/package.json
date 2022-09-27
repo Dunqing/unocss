@@ -1,6 +1,6 @@
 {
   "name": "@unocss/config",
-  "version": "0.45.22",
+  "version": "0.45.25",
   "description": "Config loader for UnoCSS",
   "author": "Anthony Fu <anthonyfu117@hotmail.com>",
   "license": "MIT",
@@ -38,6 +38,7 @@
   },
   "dependencies": {
     "@unocss/core": "workspace:*",
+    "pathe": "^0.3.7",
     "unconfig": "^0.3.6"
   }
 }

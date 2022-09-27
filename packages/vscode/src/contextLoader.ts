@@ -1,10 +1,11 @@
 import { readdir } from 'fs/promises'
-import path from 'path'
 import fs from 'fs'
+import { dirname } from 'pathe'
 import type { UnocssPluginContext, UserConfig, UserConfigDefaults } from '@unocss/core'
 import { notNull } from '@unocss/core'
 import { sourceObjectFields, sourcePluginFactory } from 'unconfig/presets'
 import presetUno from '@unocss/preset-uno'
+import { normalizePath } from 'vite'
 import { resolveOptions as resolveNuxtOptions } from '../../nuxt/src/options'
 import { createNanoEvents } from '../../core/src/utils/events'
 import { createContext, isCssId } from './integration'
@@ -134,8 +135,8 @@ export class ContextLoader {
       if (!sources.length)
         return null
 
-      const baseDir = path.dirname(sources[0])
-      if (baseDir !== dir) {
+      const baseDir = dirname(sources[0])
+      if (baseDir !== normalizePath(dir)) {
         // exists on upper level, skip
         this.contextsMap.set(dir, null)
         return null
@@ -197,7 +198,7 @@ export class ContextLoader {
 
     // try finding a config from disk
     if (fs.existsSync(file)) {
-      let dir = path.dirname(file)
+      let dir = dirname(file)
       while (isSubdir(this.cwd, dir)) {
         if (await this.configExists(dir)) {
           const context = await this.loadContextInDirectory(dir)
@@ -207,7 +208,7 @@ export class ContextLoader {
           }
         }
 
-        const newDir = path.dirname(dir)
+        const newDir = dirname(dir)
         if (newDir === dir)
           break
         dir = newDir
