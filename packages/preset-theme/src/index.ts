@@ -4,7 +4,19 @@ import type { Theme } from '@unocss/preset-mini'
 
 export interface PresetTheme {
   theme: Record<'dark' | 'light', Theme>
+  /**
+   * @default --un-preset-theme
+   */
   prefix: string
+}
+
+const getThemeVal = (theme: any, keys: string[]) => {
+  for (const key of keys) {
+    theme = theme[key]
+    if (theme === undefined)
+      return
+  }
+  return theme
 }
 
 export const presetTheme = (options: PresetTheme): Preset<Theme> => {
@@ -13,73 +25,65 @@ export const presetTheme = (options: PresetTheme): Preset<Theme> => {
   const themeValues = new Map<string, {
     light?: string
     dark?: string
+    original?: string
+    var: string
   }>()
   const varsRE = new RegExp(`var\\((${prefix}.*)\\)`)
-
-  const lightPreflightCss: string[] = []
-  const darkPreflightCss: string[] = []
-
-  const getTheme = (theme: any, keys: string[]) => {
-    for (const key of keys) {
-      theme = theme[key]
-      if (theme === undefined)
-        return
-    }
-    return theme
-  }
-
-  const recursiveTheme = (theme: Record<string, any>, preKeys: string[] = []) => {
-    Object.keys(theme).forEach((key) => {
-      const val = Reflect.get(theme, key)
-      const nextKeys = preKeys.concat(key)
-
-      if (typeof val !== 'object' && !Array.isArray(val)) {
-        const varName = `${prefix}-${nextKeys.join('-')}`
-
-        // TODO: remove
-        lightPreflightCss.push(`${varName}: ${getTheme(light, nextKeys)}`)
-        darkPreflightCss.push(`${varName}: ${getTheme(dark, nextKeys)}`)
-        // TODO: use
-        // themeValues.set(varName, {
-        //   light: `${varName}: ${getTheme(light, nextKeys)}`,
-        //   dark: `${varName}: ${getTheme(dark, nextKeys)}`,
-        // })
-
-        theme[key] = `var(${varName})`
-      }
-      else { recursiveTheme(val, nextKeys) }
-    })
-    return theme
-  }
-
-  const theme = recursiveTheme(mergeDeep(dark, light))
+  const usedTheme: {
+    light?: string | undefined
+    dark?: string | undefined
+    original?: string | undefined
+    var: string
+  }[] = []
 
   return {
     name: '@unocss/preset-theme',
-    theme,
+    extendTheme(originalTheme) {
+      const recursiveTheme = (theme: Record<string, any>, preKeys: string[] = []) => {
+        Object.keys(theme).forEach((key) => {
+          const val = Reflect.get(theme, key)
+          const themeKeys = preKeys.concat(key)
+
+          if (typeof val !== 'object' && !Array.isArray(val)) {
+            const varName = `${prefix}-${themeKeys.join('-')}`
+
+            theme[key] = `var(${varName})`
+            themeValues.set(varName, {
+              light: getThemeVal(light, themeKeys),
+              dark: getThemeVal(dark, themeKeys),
+              original: getThemeVal(originalTheme, themeKeys),
+              var: varName,
+            })
+          }
+          else {
+            recursiveTheme(val, themeKeys)
+          }
+        })
+        return theme
+      }
+
+      const theme = recursiveTheme(mergeDeep(dark, light))
+      mergeDeep(originalTheme, theme)
+    },
     preflights: [
       {
         layer: 'theme',
-        async getCSS() {
-          return `root{${lightPreflightCss.join(';')}}.dark{${darkPreflightCss.join(';')}}`
+        async getCSS(context) {
+          return (await context.generator.generate('')).css
         },
       },
     ],
     postprocess(util) {
-      // TODO: use
-      // util.entries.forEach(([, val]) => {
-      //   if (typeof val === 'string') {
-      //     const varName = val.match(varsRE)?.[1]
-      //     if (!varName)
-      //       return
-
-      //     const { dark, light } = themeValues.get(varName) || {}
-      //     if (dark)
-      //       darkPreflightCss.push(dark)
-      //     if (light)
-      //       lightPreflightCss.push(light)
-      //   }
-      // })
+      util.entries.forEach(([, val]) => {
+        if (typeof val === 'string') {
+          const varName = val.match(varsRE)?.[1]
+          if (varName) {
+            const values = themeValues.get(varName)
+            if (values)
+              usedTheme.push(values)
+          }
+        }
+      })
     },
   }
 }
