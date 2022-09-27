@@ -21,22 +21,19 @@ const getThemeVal = (theme: any, keys: string[]) => {
   return theme
 }
 
+interface ThemeValue {
+  light?: string
+  dark?: string
+  original?: string
+  name: string
+}
+
 export const presetTheme = (options: PresetTheme): Preset<Theme> => {
   const { prefix = '--un-preset-theme' } = options
   const { dark, light } = options.theme
-  const themeValues = new Map<string, {
-    light?: string
-    dark?: string
-    original?: string
-    name: string
-  }>()
   const varsRE = new RegExp(`var\\((${prefix}.*)\\)`)
-  const usedTheme: {
-    light?: string | undefined
-    dark?: string | undefined
-    original?: string | undefined
-    name: string
-  }[] = []
+  const themeValues = new Map<string, ThemeValue>()
+  const usedTheme: Array<ThemeValue> = []
 
   return {
     name: '@unocss/preset-theme',
